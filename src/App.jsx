@@ -7,6 +7,7 @@ function App() {
   const [options, setOptions] = useState(["langton's ants", "cellular automata", "turmites"]);
   const [isRunning, setIsRunning] = useState(false);
   const [tickRate, setTickRate] = useState(60); // Ticks per second
+  const [resetKey, setResetKey] = useState(0); // Key to force reset of simulation
 
   const handleOptionChange = useCallback((newOption) => {
     setOption(newOption);
@@ -16,6 +17,11 @@ function App() {
   const handleStartStop = useCallback(() => {
     setIsRunning((prev) => !prev);
   }, [setIsRunning]);
+
+  const handleReset = useCallback(() => {
+    setIsRunning(false);
+    setResetKey(prev => prev + 1); // Increment key to force reset
+  }, []);
 
   const handleTickRateChange = useCallback((event) => {
     const newRate = parseInt(event.target.value, 10);
@@ -38,6 +44,12 @@ function App() {
           className="bg-[#5C5470] hover:bg-[#B9B4C7] text-sm font-semibold text-[#FAF0E6] rounded-lg mr-4 px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           {isRunning ? "Stop" : "Start"}
+        </Button>
+        <Button 
+          onClick={handleReset}
+          className="bg-[#5C5470] hover:bg-[#B9B4C7] text-sm font-semibold text-[#FAF0E6] rounded-lg mr-4 px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+          Reset
         </Button>
         <div className="flex items-center bg-[#5C5470] rounded-lg px-4 py-2 shadow-lg transition-all duration-300 hover:shadow-xl">
           <label htmlFor="tickRate" className="text-sm font-semibold mr-3">Speed</label>
@@ -75,7 +87,12 @@ function App() {
         </div>
         <div className="w-4/5 h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-[#5C5470] p-4 transition-all duration-300 hover:shadow-2xl">
           {/* <Canvas selectedOption={option} isRunning={isRunning} tickRate={tickRate} /> */}
-          <Simulation option={option} isRunning={isRunning} tickRate={tickRate} />  
+          <Simulation 
+            key={resetKey}
+            option={option} 
+            isRunning={isRunning} 
+            tickRate={tickRate} 
+          />  
         </div>
       </div>
     </div>

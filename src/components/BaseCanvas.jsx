@@ -13,13 +13,11 @@ export default function BaseCanvas({
   const numRows = 100;
   const numCols = 100;
   
-  // Zoom and drag state
   const [zoom, setZoom] = useState(1);
   const [dragStart, setDragStart] = useState(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
-  // Memoize grid cells to prevent unnecessary re-renders
   const gridCells = useMemo(() => 
     grid.map((row, rowIndex) =>
       row.map((cell, colIndex) => (
@@ -32,7 +30,6 @@ export default function BaseCanvas({
       ))
     ), [grid, gridSize]);
 
-  // Calculate max offset based on grid size and zoom
   const getMaxOffset = useCallback(() => {
     const totalWidth = numCols * gridSize;
     const totalHeight = numRows * gridSize;
@@ -45,7 +42,6 @@ export default function BaseCanvas({
     return { maxX, maxY };
   }, [numCols, numRows, gridSize, zoom]);
 
-  // Handle zoom with mouse wheel
   const handleWheel = useCallback((e) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
@@ -60,7 +56,6 @@ export default function BaseCanvas({
     });
   }, [getMaxOffset]);
 
-  // Handle drag start
   const handleMouseDown = useCallback((e) => {
     if (e.target.closest('.grid-container')) {
       e.preventDefault();
@@ -69,7 +64,6 @@ export default function BaseCanvas({
     }
   }, [offset]);
 
-  // Handle drag movement
   const handleMouseMove = useCallback((e) => {
     if (isDragging && dragStart) {
       requestAnimationFrame(() => {
@@ -85,13 +79,11 @@ export default function BaseCanvas({
     }
   }, [isDragging, dragStart, getMaxOffset]);
 
-  // Handle drag end
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     setDragStart(null);
   }, []);
 
-  // Add event listeners for drag
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });

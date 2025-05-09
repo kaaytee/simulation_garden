@@ -39,7 +39,6 @@ export default function TurmitesCanvas({ isRunning, tickRate }) {
       stepCount={stepCount}
       setStepCount={setStepCount}
     >
-      {/* Add turmite-specific visual elements here */}
     </BaseCanvas>
   );
 } 

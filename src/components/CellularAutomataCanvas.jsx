@@ -39,7 +39,6 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
       stepCount={stepCount}
       setStepCount={setStepCount}
     >
-      {/* Add cellular automata-specific visual elements here */}
     </BaseCanvas>
   );
 } 
