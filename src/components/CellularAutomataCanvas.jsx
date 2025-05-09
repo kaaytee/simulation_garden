@@ -6,7 +6,6 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 
-// Create a Web Worker for computation
 const createWorker = () => {
   const workerCode = `
     const RULES = {
@@ -18,7 +17,16 @@ const createWorker = () => {
         (isAlive && (neighbors === 3 || neighbors === 4 || neighbors === 6 || neighbors === 7 || neighbors === 8)) ||
         (!isAlive && (neighbors === 3 || neighbors === 6 || neighbors === 7 || neighbors === 8)),
       seeds: (isAlive, neighbors) =>
-        !isAlive && neighbors === 2
+        !isAlive && neighbors === 2,
+      briansBrain: (state, neighbors) => {
+        if (state === 0) { // Off
+          return neighbors === 2 ? 1 : 0; // Turn on if exactly 2 neighbors
+        } else if (state === 1) { // On
+          return 2; // Always go to dying state
+        } else { // Dying
+          return 0; // Always turn off
+        }
+      }
     };
 
     function countNeighbors(grid, row, col, numRows, numCols) {
@@ -42,8 +50,8 @@ const createWorker = () => {
         for (let col = 0; col < numCols; col++) {
           const idx = row * numCols + col;
           const neighbors = countNeighbors(grid, row, col, numRows, numCols);
-          const isAlive = grid[idx] === 1;
-          newGrid[idx] = ruleFn(isAlive, neighbors) ? 1 : 0;
+          const currentState = grid[idx];
+          newGrid[idx] = ruleFn(currentState, neighbors);
         }
       }
       
@@ -66,7 +74,8 @@ const RULE_DESCRIPTIONS = {
   conway: "Conway's Game of Life:\n• Any live cell with 2 or 3 neighbors survives\n• Any dead cell with exactly 3 neighbors becomes alive\n• All other cells die or stay dead",
   highLife: "High Life:\n• Similar to Conway's Game of Life\n• Additional rule: dead cells with 6 neighbors become alive\n• Creates more complex patterns and replicators",
   dayAndNight: "Day & Night:\n• Symmetrical rules for birth and survival\n• Cells survive with 3,4,6,7,8 neighbors\n• Dead cells become alive with 3,6,7,8 neighbors\n• Creates interesting symmetrical patterns",
-  seeds: "Seeds:\n• Simple rule: cells only live for one generation\n• Dead cells with exactly 2 neighbors become alive\n• All live cells die in the next generation\n• Creates explosive growth patterns"
+  seeds: "Seeds:\n• Simple rule: cells only live for one generation\n• Dead cells with exactly 2 neighbors become alive\n• All live cells die in the next generation\n• Creates explosive growth patterns",
+  briansBrain: "Brian's Brain:\n• Three states: off (0), on (1), dying (2)\n• Off cells turn on if they have exactly 2 neighbors\n• On cells always go to dying state\n• Dying cells always turn off\n• Creates interesting oscillating patterns"
 };
 
 // Pattern descriptions
@@ -78,7 +87,6 @@ const PATTERN_DESCRIPTIONS = {
   gliderGun: "A complex pattern that continuously generates gliders, first discovered by Bill Gosper in 1970."
 };
 
-// Preset patterns as TypedArrays for better performance
 const PATTERNS = {
   glider: new Uint8Array([
     0, 1, 0,
@@ -120,12 +128,10 @@ const PATTERN_SIZES = {
   gliderGun: { rows: 9, cols: 36 }
 };
 
-export default function CellularAutomataCanvas({ isRunning, tickRate }) {
+export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRate }) {
   const numRows = 100;
   const numCols = 100;
-  const [selectedRule, setSelectedRule] = useState('conway');
   const [selectedPattern, setSelectedPattern] = useState('random');
-  const ruleHoverRef = useRef(null);
   const patternHoverRef = useRef(null);
   const workerRef = useRef(null);
   const gridRef = useRef(null);
@@ -248,34 +254,22 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
     return result;
   }, [grid, numRows, numCols]);
 
+  // Add color mapping for Brian's Brain states
+  const getCellColor = (state) => {
+    if (selectedRule === 'briansBrain') {
+      switch (state) {
+        case 0: return '#000000'; // Off - black
+        case 1: return '#ffffff'; // On - white
+        case 2: return '#666666'; // Dying - gray
+        default: return '#000000';
+      }
+    }
+    return state === 1 ? '#ffffff' : '#000000';
+  };
+
   return (
     <div className="relative h-full w-full">
       <div className="absolute top-2 right-2 z-10 flex flex-col sm:flex-row gap-2">
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <select
-              value={selectedRule}
-              onChange={(e) => setSelectedRule(e.target.value)}
-              onMouseDown={() => ruleHoverRef.current?.close()}
-              className="w-full sm:w-auto bg-[#5C5470]/90 backdrop-blur-sm px-3 py-2 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
-              ref={ruleHoverRef}
-            >
-              <option value="conway">Conway's Game of Life</option>
-              <option value="highLife">High Life</option>
-              <option value="dayAndNight">Day & Night</option>
-              <option value="seeds">Seeds</option>
-            </select>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-[calc(100vw-2rem)] sm:w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold">{selectedRule === 'conway' ? "Conway's Game of Life" : 
-                selectedRule === 'highLife' ? "High Life" :
-                selectedRule === 'dayAndNight' ? "Day & Night" : "Seeds"}</h4>
-              <p className="text-sm whitespace-pre-line">{RULE_DESCRIPTIONS[selectedRule]}</p>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-
         <HoverCard>
           <HoverCardTrigger asChild>
             <select

@@ -140,7 +140,7 @@ export default function BaseCanvas({
     <div className="h-full w-full overflow-hidden relative">
       {!hideStepCounter && (
         <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-[#5C5470]/90 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-mono shadow-lg transition-all duration-300 text-[#FAF0E6] hover:shadow-xl">
-          Steps: {stepCount}
+          Iteration: {stepCount}
         </div>
       )}
       <div 

@@ -1,81 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { useState, useCallback } from "react";
+import { Flower } from "lucide-react";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import Simulation from "./components/Simulation";
 import { ToastContainer } from "./components/ui/toast";
-import { Flower } from "lucide-react";
+import { useSimulation } from "./lib/hooks/useSimulation";
+import { RULE_DESCRIPTIONS, SIMULATION_OPTIONS } from "./lib/constants";
 
 function App() {
-  const [option, setOption] = useState("classic");
-  const [options, setOptions] = useState([
-    {
-      category: "Classic Rules",
-      items: [
-        { id: "classic", name: "Classic Cellular Automata" }
-      ]
-    },
-    {
-      category: "Ants & Turmites",
-      items: [
-        { id: "ants/langton", name: "Langton's Ant" },
-        { id: "ants/turmites", name: "Turmites" }
-      ]
-    }
-  ]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [tickRate, setTickRate] = useState(1); 
-  const [resetKey, setResetKey] = useState(0);
-  const [toasts, setToasts] = useState([]);
-
-  const addToast = useCallback((message, type = "info") => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  }, []);
-
-  const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
-
-  const handleOptionChange = useCallback((newOption) => {
-    setOption(newOption);
-    setIsRunning(false);
-  }, [setOption, setIsRunning]);
-
-  const handleStartStop = useCallback(() => {
-    setIsRunning((prev) => {
-      const newState = !prev;
-      addToast(newState ? "Simulation started" : "Simulation paused", newState ? "success" : "info");
-      return newState;
-    });
-  }, [setIsRunning, addToast]);
-
-  const handleReset = useCallback(() => {
-    setIsRunning(false);
-    setResetKey(prev => prev + 1);
-    addToast("Simulation reset", "info");
-  }, [addToast]);
-
-  const handleTickRateChange = useCallback((event) => {
-    const newRate = parseInt(event.target.value, 10);
-    if (!isNaN(newRate)) {
-      // capped between 1 and 5 for cellular automata
-      if (option === "classic") {
-        setTickRate(Math.max(1, Math.min(5, newRate)));
-      } else {
-        //  langton's Ants, allow higher speeds
-        setTickRate(Math.max(1, newRate));
-      }
-    }
-  }, [setTickRate, option]);
-
-  const handleSpeedAdjustment = useCallback((adjustment) => {
-    setTickRate(prev => {
-      const newRate = prev + adjustment;
-      if (option === "classic") {
-        return Math.max(1, Math.min(5, newRate));
-      }
-      return Math.max(1, newRate);
-    });
-  }, [option]);
+  const {
+    option,
+    isRunning,
+    tickRate,
+    resetKey,
+    toasts,
+    addToast,
+    removeToast,
+    handleOptionChange,
+    handleStartStop,
+    handleReset,
+    handleTickRateChange,
+    handleSpeedAdjustment
+  } = useSimulation();
 
   return (
     <div className="flex flex-col items-center min-h-svh bg-gradient-to-br from-[#352F44] via-[#2A2438] to-[#352F44] p-2 sm:p-6">
@@ -165,21 +114,43 @@ function App() {
 
       <div className="flex flex-col sm:flex-row flex-grow p-2 gap-4 sm:gap-6 w-full max-w-[1200px]">
         <div className="bg-gradient-to-br from-[#5C5470] to-[#6B5B95] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/4 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
-          {options.map((category) => (
+          {SIMULATION_OPTIONS.map((category) => (
             <div key={category.category} className="flex flex-col gap-2">
               <h3 className="text-base sm:text-lg font-semibold text-[#FAF0E6] px-2">{category.category}</h3>
               {category.items.map((item) => {
                 const isSelected = option === item.id;
                 const buttonStyle = isSelected 
-                  ? "bg-[#FAF0E6] hover:bg-[#B9B4C7] shadow-md" 
+                  ? "bg-[#FAF0E6] hover:bg-[#FAF0E6] shadow-md" 
                   : "bg-[#B9B4C7] hover:bg-[#B9B4C7] hover:shadow-md";
                 const textStyle = "text-base sm:text-lg font-semibold text-black transition-all duration-300";
+
+                if (item.id.startsWith('classic/') || item.id.startsWith('ants/')) {
+                  const ruleName = item.id.split('/')[1];
+                  return (
+                    <HoverCard key={item.id}>
+                      <HoverCardTrigger asChild>
+                        <Button
+                          onClick={() => handleOptionChange(item.id)}
+                          className={`${buttonStyle} ${textStyle} rounded-lg py-2 px-4 w-full text-center transform hover:-translate-y-0.5`}
+                        >
+                          {item.name}
+                        </Button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-[calc(100vw-2rem)] sm:w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-semibold">{item.name}</h4>
+                          <p className="text-sm whitespace-pre-line">{RULE_DESCRIPTIONS[ruleName]}</p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
+                  );
+                }
 
                 return (
                   <Button
                     key={item.id}
                     onClick={() => handleOptionChange(item.id)}
-                    className={`${buttonStyle} ${textStyle} rounded-lg py-3 px-6 w-full text-center transform hover:-translate-y-0.5`}
+                    className={`${buttonStyle} ${textStyle} rounded-lg py-2 px-4 w-full text-center transform hover:-translate-y-0.5`}
                   >
                     {item.name}
                   </Button>
