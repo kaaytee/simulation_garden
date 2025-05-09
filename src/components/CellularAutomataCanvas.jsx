@@ -135,8 +135,8 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
   const patternHoverRef = useRef(null);
   const workerRef = useRef(null);
   const gridRef = useRef(null);
+  const [generation, setGeneration] = useState(0);
   
-  // Initialize grid with random cells using Uint8Array for better performance
   const [grid, setGrid] = useState(() => {
     const newGrid = new Uint8Array(numRows * numCols);
     for (let i = 0; i < newGrid.length; i++) {
@@ -145,16 +145,19 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
     return newGrid;
   });
 
-  // Keep gridRef in sync with grid state
+  // keep gridRef in sync with grid state
   useEffect(() => {
     gridRef.current = grid;
   }, [grid]);
 
-  // Initialize Web Worker
+  // start web worker
   useEffect(() => {
     workerRef.current = createWorker();
     workerRef.current.onmessage = (e) => {
-      setGrid(e.data);
+      if (isRunning) { 
+        setGrid(e.data);
+        setGeneration(prev => prev + 1);
+      }
     };
 
     return () => {
@@ -162,10 +165,10 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
         workerRef.current.terminate();
       }
     };
-  }, []);
+  }, [isRunning]); 
 
-  // Apply selected pattern
   const applyPattern = useCallback((patternName) => {
+    setGeneration(0); 
     if (patternName === 'random') {
       const newGrid = new Uint8Array(numRows * numCols);
       for (let i = 0; i < newGrid.length; i++) {
@@ -202,12 +205,12 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
     setGrid(prevGrid => {
       const newGrid = new Uint8Array(prevGrid);
       const idx = row * numCols + col;
-      newGrid[idx] = 1 - newGrid[idx]; // Toggle cell state
+      newGrid[idx] = 1 - newGrid[idx];
       return newGrid;
     });
   }, [numCols]);
 
-  // Update grid using Web Worker
+
   useEffect(() => {
     let animationFrameId;
     let lastUpdate = 0;
@@ -217,7 +220,6 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
       if (isRunning) {
         if (timestamp - lastUpdate >= intervalTime) {
           if (workerRef.current && gridRef.current) {
-            // Create a copy of the current grid to send to the worker
             const gridCopy = new Uint8Array(gridRef.current);
             workerRef.current.postMessage({
               grid: gridCopy,
@@ -255,12 +257,15 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
   }, [grid, numRows, numCols]);
 
   // Add color mapping for Brian's Brain states
+  // 0 = black - off  
+  // 1 = white - on
+  // 2 = gray - dying
   const getCellColor = (state) => {
     if (selectedRule === 'briansBrain') {
       switch (state) {
-        case 0: return '#000000'; // Off - black
-        case 1: return '#ffffff'; // On - white
-        case 2: return '#666666'; // Dying - gray
+        case 0: return '#000000';
+        case 1: return '#ffffff'; 
+        case 2: return '#666666'; 
         default: return '#000000';
       }
     }
@@ -270,14 +275,15 @@ export default function CellularAutomataCanvas({ selectedRule, isRunning, tickRa
   return (
     <div className="relative h-full w-full">
       <div className="absolute top-2 right-2 z-10 flex flex-col sm:flex-row gap-2">
+        <div className="bg-[#5C5470]/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg">
+          Generation: {generation}
+        </div>
         <HoverCard>
           <HoverCardTrigger asChild>
             <select
               value={selectedPattern}
               onChange={(e) => setSelectedPattern(e.target.value)}
-              onMouseDown={() => patternHoverRef.current?.close()}
               className="w-full sm:w-auto bg-[#5C5470]/90 backdrop-blur-sm px-3 py-2 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
-              ref={patternHoverRef}
             >
               <option value="random">Random</option>
               {Object.keys(PATTERNS).map((pattern) => (
