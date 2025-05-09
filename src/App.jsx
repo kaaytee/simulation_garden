@@ -5,8 +5,22 @@ import { ToastContainer } from "./components/ui/toast";
 import { Flower } from "lucide-react";
 
 function App() {
-  const [option, setOption] = useState("langton's ants");
-  const [options, setOptions] = useState(["langton's ants", "cellular automata", "turmites"]);
+  const [option, setOption] = useState("classic");
+  const [options, setOptions] = useState([
+    {
+      category: "Classic Rules",
+      items: [
+        { id: "classic", name: "Classic Cellular Automata" }
+      ]
+    },
+    {
+      category: "Ants & Turmites",
+      items: [
+        { id: "ants/langton", name: "Langton's Ant" },
+        { id: "ants/turmites", name: "Turmites" }
+      ]
+    }
+  ]);
   const [isRunning, setIsRunning] = useState(false);
   const [tickRate, setTickRate] = useState(1); 
   const [resetKey, setResetKey] = useState(0);
@@ -44,7 +58,7 @@ function App() {
     const newRate = parseInt(event.target.value, 10);
     if (!isNaN(newRate)) {
       // capped between 1 and 5 for cellular automata
-      if (option === "cellular automata") {
+      if (option === "classic") {
         setTickRate(Math.max(1, Math.min(5, newRate)));
       } else {
         //  langton's Ants, allow higher speeds
@@ -54,8 +68,14 @@ function App() {
   }, [setTickRate, option]);
 
   const handleSpeedAdjustment = useCallback((adjustment) => {
-    setTickRate(prev => Math.max(1, prev + adjustment));
-  }, []);
+    setTickRate(prev => {
+      const newRate = prev + adjustment;
+      if (option === "classic") {
+        return Math.max(1, Math.min(5, newRate));
+      }
+      return Math.max(1, newRate);
+    });
+  }, [option]);
 
   return (
     <div className="flex flex-col items-center min-h-svh bg-gradient-to-br from-[#352F44] via-[#2A2438] to-[#352F44] p-2 sm:p-6">
@@ -90,14 +110,30 @@ function App() {
               id="tickRate"
               type="number"
               min="1"
-              max={option === "cellular automata" ? "5" : undefined}
+              max={option === "classic" ? "5" : undefined}
               value={tickRate}
               onChange={handleTickRateChange}
               className="w-16 sm:w-20 text-[#FAF0E6] text-center rounded-md text-sm bg-[#352F44]/50 border border-[#B9B4C7]/30 focus:outline-none focus:border-[#B9B4C7] focus:ring-1 focus:ring-[#B9B4C7] transition-all duration-300"
             />
           </div>
         </div>
-        {option === "langton's ants" && (
+        {option === "classic" && (
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleSpeedAdjustment(-1)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-lg font-bold text-black rounded-lg px-3 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              -
+            </Button>
+            <Button
+              onClick={() => handleSpeedAdjustment(1)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-lg font-bold text-black rounded-lg px-3 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              +
+            </Button>
+          </div>
+        )}
+        {option.startsWith("ants/") && (
           <div className="flex gap-2">
             <Button
               onClick={() => handleSpeedAdjustment(-100)}
@@ -128,24 +164,29 @@ function App() {
       </div>
 
       <div className="flex flex-col sm:flex-row flex-grow p-2 gap-4 sm:gap-6 w-full max-w-[1200px]">
-        <div className="bg-gradient-to-br from-[#5C5470] to-[#6B5B95] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/5 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
-          {options.map((e) => {
-            const isSelected = option === e;
-            const buttonStyle = isSelected 
-              ? "bg-[#FAF0E6] hover:bg-[#B9B4C7] shadow-md" 
-              : "bg-[#B9B4C7] hover:bg-[#B9B4C7] hover:shadow-md";
-            const textStyle = "text-sm font-semibold text-black transition-all duration-300";
+        <div className="bg-gradient-to-br from-[#5C5470] to-[#6B5B95] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/4 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
+          {options.map((category) => (
+            <div key={category.category} className="flex flex-col gap-2">
+              <h3 className="text-base sm:text-lg font-semibold text-[#FAF0E6] px-2">{category.category}</h3>
+              {category.items.map((item) => {
+                const isSelected = option === item.id;
+                const buttonStyle = isSelected 
+                  ? "bg-[#FAF0E6] hover:bg-[#B9B4C7] shadow-md" 
+                  : "bg-[#B9B4C7] hover:bg-[#B9B4C7] hover:shadow-md";
+                const textStyle = "text-base sm:text-lg font-semibold text-black transition-all duration-300";
 
-            return (
-              <Button
-                key={e}
-                onClick={() => handleOptionChange(e)}
-                className={`${buttonStyle} ${textStyle} rounded-lg h-1/10 py-2 flex-1 sm:flex-none transform hover:-translate-y-0.5`}
-              >
-                {e}
-              </Button>
-            );
-          })}
+                return (
+                  <Button
+                    key={item.id}
+                    onClick={() => handleOptionChange(item.id)}
+                    className={`${buttonStyle} ${textStyle} rounded-lg py-3 px-6 w-full text-center transform hover:-translate-y-0.5`}
+                  >
+                    {item.name}
+                  </Button>
+                );
+              })}
+            </div>
+          ))}
         </div>
         <div className="w-full sm:w-4/5 h-[calc(100vh-300px)] sm:h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-gradient-to-br from-[#5C5470] to-[#6B5B95] p-3 sm:p-4 transition-all duration-300 hover:shadow-2xl">
           <Simulation 
