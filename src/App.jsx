@@ -11,7 +11,7 @@ import { ToastContainer } from "./components/ui/toast";
 import { useSimulation } from "./lib/hooks/useSimulation";
 import { RULE_DESCRIPTIONS, SIMULATION_OPTIONS } from "./lib/constants";
 import LandingPage from "./components/LandingPage";
-
+import { useNavigate } from "react-router-dom";
 function SimulationPage() {
   const {
     option,
@@ -28,16 +28,28 @@ function SimulationPage() {
     handleSpeedAdjustment
   } = useSimulation();
 
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col items-center min-h-svh bg-gradient-to-br from-[#352F44] via-[#2A2438] to-[#352F44] p-2 sm:p-6">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <header className="w-full max-w-[1200px] mb-4 sm:mb-6">
-        <div className="flex flex-col items-center justify-center items-start bg-gradient-to-r from-[#5C5470] to-[#6B5B95] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
-          <div className="flex items-center gap-3">
-            <Flower className="w-8 h-8 text-[#FAF0E6]" />
-            <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] mb-2 sm:mb-3 tracking-wide">Simulation Garden</h1>
+        <div className="flex flex-col items-center justify-center bg-gradient-to-r from-[#5C5470] to-[#6B5B95] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
+          <div className="flex items-center justify-between w-full gap-3">
+            <div className="flex flex-col items-start">
+              <div className="flex items-center gap-3">
+                <Flower className="w-8 h-8 text-[#FAF0E6]" />
+                <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] tracking-wide">Simulation Garden</h1>
+              </div>
+              <div className="h-1 w-24 sm:w-32 bg-[#B9B4C7] rounded-full mt-2"></div>
+            </div>
+            <Button 
+              onClick={() => navigate('/')}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-4 sm:px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              Back
+            </Button>
           </div>
-          <div className="h-1 w-24 sm:w-32 bg-[#B9B4C7] rounded-full"></div>
         </div>
       </header>
       
