@@ -6,12 +6,12 @@ function App() {
   const [option, setOption] = useState("langton's ants");
   const [options, setOptions] = useState(["langton's ants", "cellular automata", "turmites"]);
   const [isRunning, setIsRunning] = useState(false);
-  const [tickRate, setTickRate] = useState(60); // Ticks per second
-  const [resetKey, setResetKey] = useState(0); // Key to force reset of simulation
+  const [tickRate, setTickRate] = useState(1); 
+  const [resetKey, setResetKey] = useState(0); 
 
   const handleOptionChange = useCallback((newOption) => {
     setOption(newOption);
-    setIsRunning(false); // Stop simulation when option changes
+    setIsRunning(false); 
   }, [setOption, setIsRunning]);
 
   const handleStartStop = useCallback(() => {
@@ -20,53 +20,94 @@ function App() {
 
   const handleReset = useCallback(() => {
     setIsRunning(false);
-    setResetKey(prev => prev + 1); // Increment key to force reset
+    setResetKey(prev => prev + 1); 
   }, []);
 
   const handleTickRateChange = useCallback((event) => {
     const newRate = parseInt(event.target.value, 10);
-    if (!isNaN(newRate) && newRate > 0) {
-      // Limit maximum speed to 1000 
-      setTickRate(Math.min(newRate, 1000));
+    if (!isNaN(newRate)) {
+      // Limit speed between 1 and 5 for cellular automata
+      if (option === "cellular automata") {
+        setTickRate(Math.max(1, Math.min(5, newRate)));
+      } else {
+        // For Langton's Ants, allow higher speeds
+        setTickRate(Math.max(1, newRate));
+      }
     }
-  }, [setTickRate]);
+  }, [setTickRate, option]);
+
+  const handleSpeedAdjustment = useCallback((adjustment) => {
+    setTickRate(prev => Math.max(1, prev + adjustment));
+  }, []);
 
   return (
-    <div className="flex flex-col items-center min-h-svh bg-[#352F44] p-6">
-      <header className="w-full max-w-[1200px] mb-6">
-        <h1 className="text-2xl font-bold text-[#FAF0E6] mb-2 tracking-wide">Simulation Garden</h1>
-        <div className="h-1 w-20 bg-[#B9B4C7] rounded-full"></div>
+    <div className="flex flex-col items-center min-h-svh bg-[#352F44] p-2 sm:p-6">
+      <header className="w-full max-w-[1200px] mb-4 sm:mb-6">
+        <div className="flex flex-col items-center justify-center items-start bg-[#5C5470] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] mb-2 sm:mb-3 tracking-wide">Simulation Garden</h1>
+          <div className="h-1 w-24 sm:w-32 bg-[#B9B4C7] rounded-full"></div>
+        </div>
       </header>
       
-      <div className="flex justify-center mb-6 text-[#FAF0E6] w-full max-w-[1200px]">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 text-[#FAF0E6] bg-[#5C5470] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-2/5 max-w-[1200px]">
         <Button 
           onClick={handleStartStop} 
-          className="bg-[#5C5470] hover:bg-[#B9B4C7] text-sm font-semibold text-[#FAF0E6] rounded-lg mr-4 px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-4 sm:px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           {isRunning ? "Stop" : "Start"}
         </Button>
         <Button 
           onClick={handleReset}
-          className="bg-[#5C5470] hover:bg-[#B9B4C7] text-sm font-semibold text-[#FAF0E6] rounded-lg mr-4 px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-4 sm:px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >
           Reset
         </Button>
-        <div className="flex items-center bg-[#5C5470] rounded-lg px-4 py-2 shadow-lg transition-all duration-300 hover:shadow-xl">
-          <label htmlFor="tickRate" className="text-sm font-semibold mr-3">Speed</label>
+        <div className="flex items-center bg-[#B9B4C7] rounded-lg px-3 sm:px-4 py-2 shadow-lg transition-all duration-300 hover:shadow-xl">
+          <label htmlFor="tickRate" className="text-sm font-semibold mr-2 sm:mr-3 text-black">Speed</label>
           <div className="relative">
             <input
               id="tickRate"
               type="number"
+              min="1"
+              max={option === "cellular automata" ? "5" : undefined}
               value={tickRate}
               onChange={handleTickRateChange}
-              className="w-20 text-[#FAF0E6] text-center rounded-md text-sm bg-[#352F44]/50 border border-[#B9B4C7]/30 focus:outline-none focus:border-[#B9B4C7] focus:ring-1 focus:ring-[#B9B4C7] transition-all duration-300 "
+              className="w-16 sm:w-20 text-[#FAF0E6] text-center rounded-md text-sm bg-[#352F44]/50 border border-[#B9B4C7]/30 focus:outline-none focus:border-[#B9B4C7] focus:ring-1 focus:ring-[#B9B4C7] transition-all duration-300"
             />
           </div>
         </div>
+        {option === "langton's ants" && (
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleSpeedAdjustment(-100)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-2 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              -100
+            </Button>
+            <Button
+              onClick={() => handleSpeedAdjustment(-10)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-2 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              -10
+            </Button>
+            <Button
+              onClick={() => handleSpeedAdjustment(10)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-2 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              +10
+            </Button>
+            <Button
+              onClick={() => handleSpeedAdjustment(100)}
+              className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-2 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              +100
+            </Button>
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-grow p-2 gap-6 w-full max-w-[1200px]">
-        <div className="bg-[#5C5470] flex flex-col gap-3 p-4 w-1/5 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
+      <div className="flex flex-col sm:flex-row flex-grow p-2 gap-4 sm:gap-6 w-full max-w-[1200px]">
+        <div className="bg-[#5C5470] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/5 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
           {options.map((e) => {
             const isSelected = option === e;
             const buttonStyle = isSelected 
@@ -78,15 +119,14 @@ function App() {
               <Button
                 key={e}
                 onClick={() => handleOptionChange(e)}
-                className={`${buttonStyle} ${textStyle} rounded-lg py-2 transform hover:-translate-y-0.5`}
+                className={`${buttonStyle} ${textStyle} rounded-lg h-1/10 py-2 flex-1 sm:flex-none transform hover:-translate-y-0.5`}
               >
                 {e}
               </Button>
             );
           })}
         </div>
-        <div className="w-4/5 h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-[#5C5470] p-4 transition-all duration-300 hover:shadow-2xl">
-          {/* <Canvas selectedOption={option} isRunning={isRunning} tickRate={tickRate} /> */}
+        <div className="w-full sm:w-4/5 h-[calc(100vh-300px)] sm:h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-[#5C5470] p-3 sm:p-4 transition-all duration-300 hover:shadow-2xl">
           <Simulation 
             key={resetKey}
             option={option} 
