@@ -1,36 +1,53 @@
 import { Button } from "@/components/ui/button";
 import { useState, useCallback } from "react";
 import Simulation from "./components/Simulation";
+import { ToastContainer } from "./components/ui/toast";
 
 function App() {
   const [option, setOption] = useState("langton's ants");
   const [options, setOptions] = useState(["langton's ants", "cellular automata", "turmites"]);
   const [isRunning, setIsRunning] = useState(false);
   const [tickRate, setTickRate] = useState(1); 
-  const [resetKey, setResetKey] = useState(0); 
+  const [resetKey, setResetKey] = useState(0);
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = useCallback((message, type = "info") => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
 
   const handleOptionChange = useCallback((newOption) => {
     setOption(newOption);
-    setIsRunning(false); 
-  }, [setOption, setIsRunning]);
+    setIsRunning(false);
+    addToast(`Switched to ${newOption} simulation`, "info");
+  }, [setOption, setIsRunning, addToast]);
 
   const handleStartStop = useCallback(() => {
-    setIsRunning((prev) => !prev);
-  }, [setIsRunning]);
+    setIsRunning((prev) => {
+      const newState = !prev;
+      addToast(newState ? "Simulation started" : "Simulation paused", newState ? "success" : "info");
+      return newState;
+    });
+  }, [setIsRunning, addToast]);
 
   const handleReset = useCallback(() => {
     setIsRunning(false);
-    setResetKey(prev => prev + 1); 
-  }, []);
+    setResetKey(prev => prev + 1);
+    addToast("Simulation reset", "info");
+  }, [addToast]);
 
   const handleTickRateChange = useCallback((event) => {
     const newRate = parseInt(event.target.value, 10);
     if (!isNaN(newRate)) {
-      // Limit speed between 1 and 5 for cellular automata
+      // capped between 1 and 5 for cellular automata
       if (option === "cellular automata") {
         setTickRate(Math.max(1, Math.min(5, newRate)));
       } else {
-        // For Langton's Ants, allow higher speeds
+        //  langton's Ants, allow higher speeds
         setTickRate(Math.max(1, newRate));
       }
     }
@@ -42,6 +59,7 @@ function App() {
 
   return (
     <div className="flex flex-col items-center min-h-svh bg-[#352F44] p-2 sm:p-6">
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       <header className="w-full max-w-[1200px] mb-4 sm:mb-6">
         <div className="flex flex-col items-center justify-center items-start bg-[#5C5470] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
           <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] mb-2 sm:mb-3 tracking-wide">Simulation Garden</h1>
