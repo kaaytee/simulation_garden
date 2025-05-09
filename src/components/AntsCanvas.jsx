@@ -74,12 +74,10 @@ export default function AntsCanvas({ isRunning, tickRate }) {
       setStepCount={setStepCount}
     >
       <div
-        className="absolute rounded-full bg-red-500 will-change-transform transition-transform duration-300 shadow-lg"
+        className="absolute rounded-full bg-red-500 w-[10px] h-[10px] will-change-transform transition-transform duration-300 shadow-lg"
         style={{
-          width: '12.5px',
-          height: '12.5px',
-          left: `${antPosition.col * 25 + 6.25}px`,
-          top: `${antPosition.row * 25 + 8.33}px`,
+          left: `${antPosition.col * 20 + 5}px`,
+          top: `${antPosition.row * 20 + 5}px`,
           transform: `rotate(${antOrientation * 90}deg)`,
           boxShadow: '0 0 10px rgba(239, 68, 68, 0.5)'
         }}
