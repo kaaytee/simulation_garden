@@ -1,3 +1,4 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Flower } from "lucide-react";
 import {
@@ -9,8 +10,9 @@ import Simulation from "./components/Simulation";
 import { ToastContainer } from "./components/ui/toast";
 import { useSimulation } from "./lib/hooks/useSimulation";
 import { RULE_DESCRIPTIONS, SIMULATION_OPTIONS } from "./lib/constants";
+import LandingPage from "./components/LandingPage";
 
-function App() {
+function SimulationPage() {
   const {
     option,
     isRunning,
@@ -169,6 +171,17 @@ function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/simulation" element={<SimulationPage />} />
+      </Routes>
+    </Router>
   );
 }
 
