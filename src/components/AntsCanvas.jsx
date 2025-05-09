@@ -20,8 +20,8 @@ export default function AntsCanvas({ isRunning, tickRate }) {
         newGrid[currentRow][currentCol] = 1 - currentColor;
 
         const nextOrientation = currentColor === 0 
-          ? (currentOrientation + 3) % 4  // Turn LEFT on white
-          : (currentOrientation + 1) % 4; // Turn RIGHT on black
+          ? (currentOrientation + 1) % 4  // Turn RIGHT on white
+          : (currentOrientation + 3) % 4; // Turn LEFT on black
 
         let nextRow = currentRow;
         let nextCol = currentCol;

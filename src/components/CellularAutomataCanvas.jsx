@@ -250,14 +250,14 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
 
   return (
     <div className="relative h-full w-full">
-      <div className="absolute top-2 right-2 z-10 flex gap-2">
+      <div className="absolute top-2 right-2 z-10 flex flex-col sm:flex-row gap-2">
         <HoverCard>
           <HoverCardTrigger asChild>
             <select
               value={selectedRule}
               onChange={(e) => setSelectedRule(e.target.value)}
               onMouseDown={() => ruleHoverRef.current?.close()}
-              className="bg-[#5C5470]/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
+              className="w-full sm:w-auto bg-[#5C5470]/90 backdrop-blur-sm px-3 py-2 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
               ref={ruleHoverRef}
             >
               <option value="conway">Conway's Game of Life</option>
@@ -266,7 +266,7 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
               <option value="seeds">Seeds</option>
             </select>
           </HoverCardTrigger>
-          <HoverCardContent className="w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
+          <HoverCardContent className="w-[calc(100vw-2rem)] sm:w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
             <div className="space-y-2">
               <h4 className="text-sm font-semibold">{selectedRule === 'conway' ? "Conway's Game of Life" : 
                 selectedRule === 'highLife' ? "High Life" :
@@ -282,7 +282,7 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
               value={selectedPattern}
               onChange={(e) => setSelectedPattern(e.target.value)}
               onMouseDown={() => patternHoverRef.current?.close()}
-              className="bg-[#5C5470]/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
+              className="w-full sm:w-auto bg-[#5C5470]/90 backdrop-blur-sm px-3 py-2 rounded-lg text-sm font-mono text-[#FAF0E6] shadow-lg"
               ref={patternHoverRef}
             >
               <option value="random">Random</option>
@@ -291,7 +291,7 @@ export default function CellularAutomataCanvas({ isRunning, tickRate }) {
               ))}
             </select>
           </HoverCardTrigger>
-          <HoverCardContent className="w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
+          <HoverCardContent className="w-[calc(100vw-2rem)] sm:w-80 bg-[#5C5470] text-[#FAF0E6] border-[#B9B4C7]">
             <div className="space-y-2">
               <h4 className="text-sm font-semibold">{selectedPattern === 'random' ? 'Random Pattern' : selectedPattern}</h4>
               <p className="text-sm">{selectedPattern === 'random' ? 

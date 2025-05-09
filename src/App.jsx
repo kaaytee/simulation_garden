@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useCallback } from "react";
 import Simulation from "./components/Simulation";
 import { ToastContainer } from "./components/ui/toast";
+import { Flower } from "lucide-react";
 
 function App() {
   const [option, setOption] = useState("langton's ants");
@@ -23,8 +24,7 @@ function App() {
   const handleOptionChange = useCallback((newOption) => {
     setOption(newOption);
     setIsRunning(false);
-    addToast(`Switched to ${newOption} simulation`, "info");
-  }, [setOption, setIsRunning, addToast]);
+  }, [setOption, setIsRunning]);
 
   const handleStartStop = useCallback(() => {
     setIsRunning((prev) => {
@@ -58,16 +58,19 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center min-h-svh bg-[#352F44] p-2 sm:p-6">
+    <div className="flex flex-col items-center min-h-svh bg-gradient-to-br from-[#352F44] via-[#2A2438] to-[#352F44] p-2 sm:p-6">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <header className="w-full max-w-[1200px] mb-4 sm:mb-6">
-        <div className="flex flex-col items-center justify-center items-start bg-[#5C5470] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] mb-2 sm:mb-3 tracking-wide">Simulation Garden</h1>
+        <div className="flex flex-col items-center justify-center items-start bg-gradient-to-r from-[#5C5470] to-[#6B5B95] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl">
+          <div className="flex items-center gap-3">
+            <Flower className="w-8 h-8 text-[#FAF0E6]" />
+            <h1 className="text-xl sm:text-2xl font-bold text-[#FAF0E6] mb-2 sm:mb-3 tracking-wide">Simulation Garden</h1>
+          </div>
           <div className="h-1 w-24 sm:w-32 bg-[#B9B4C7] rounded-full"></div>
         </div>
       </header>
       
-      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 text-[#FAF0E6] bg-[#5C5470] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-2/5 max-w-[1200px]">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 text-[#FAF0E6] bg-gradient-to-r from-[#5C5470] to-[#6B5B95] rounded-lg px-4 sm:px-6 py-3 sm:py-4 shadow-lg transition-all duration-300 hover:shadow-xl w-full sm:w-2/5 max-w-[1200px]">
         <Button 
           onClick={handleStartStop} 
           className="bg-[#B9B4C7] hover:bg-[#B9B4C7] text-sm font-semibold text-black rounded-lg px-4 sm:px-6 py-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -125,7 +128,7 @@ function App() {
       </div>
 
       <div className="flex flex-col sm:flex-row flex-grow p-2 gap-4 sm:gap-6 w-full max-w-[1200px]">
-        <div className="bg-[#5C5470] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/5 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
+        <div className="bg-gradient-to-br from-[#5C5470] to-[#6B5B95] flex flex-row sm:flex-col gap-2 sm:gap-5 p-3 sm:p-4 w-full sm:w-1/5 rounded-2xl shadow-xl transition-all duration-300 hover:shadow-2xl">
           {options.map((e) => {
             const isSelected = option === e;
             const buttonStyle = isSelected 
@@ -144,7 +147,7 @@ function App() {
             );
           })}
         </div>
-        <div className="w-full sm:w-4/5 h-[calc(100vh-300px)] sm:h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-[#5C5470] p-3 sm:p-4 transition-all duration-300 hover:shadow-2xl">
+        <div className="w-full sm:w-4/5 h-[calc(100vh-300px)] sm:h-[calc(100vh-200px)] overflow-auto rounded-2xl shadow-xl bg-gradient-to-br from-[#5C5470] to-[#6B5B95] p-3 sm:p-4 transition-all duration-300 hover:shadow-2xl">
           <Simulation 
             key={resetKey}
             option={option} 
